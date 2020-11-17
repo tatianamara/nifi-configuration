@@ -1,0 +1,78 @@
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+version: "3"
+# networks:
+#   network_name:
+#     name: custom_network
+services:
+  zookeeper:
+    hostname: zookeeper
+    container_name: zookeeper
+    image: 'bitnami/zookeeper:latest'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  nifi:
+    image: apache/nifi:latest
+    ports:
+      - 8080:8080 # Unsecured HTTP Web Port
+    restart: always
+    # networks:
+    #   - custom_network
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
+      - NIFI_CLUSTER_IS_NODE=true
+      - NIFI_CLUSTER_NODE_PROTOCOL_PORT=8082
+      - NIFI_ZK_CONNECT_STRING=zookeeper:2181
+      - NIFI_ELECTION_MAX_WAIT=1 min
+      - NIFI_HOME=/home/nifi
+      - NIFI_LOG_DIR=/home/nifi/logs
+      # - NIFI_JVM_HEAP_INIT=4g
+      # - NIFI_JVM_HEAP_MAX=6g
+      # - NIFI_VARIABLE_REGISTRY_PROPERTIES=./conf/env.properties
+    volumes:
+      - nifi_data:/home/nifi
+    # volumes:
+    #   - ./nifi/state:/opt/nifi/nifi-current/state
+    #   - ./nifi/db:/opt/nifi/nifi-current/database_repository
+    #   - ./nifi/flowfile:/opt/nifi/nifi-current/flowfile_repository
+    #   - ./nifi/content:/opt/nifi/nifi-current/content_repository
+    #   - ./nifi/provenance:/opt/nifi/nifi-current/provenance_repository
+    #   - ./nifi/logs:/opt/nifi/nifi-current/logs
+  registry:
+    image: apache/nifi-registry:latest
+    ports:
+      - 18080:18080 
+    environment:
+      - NIFI_REGISTRY_WEB_HTTP_HOST=0.0.0.0
+      - JVM_OPTS=-Xmx512m -Xms512m -XX:MaxPermSize=1g
+    volumes:
+      - ./nifi-registry/flow_storage:/opt/nifi-registry/nifi-registry-current/flow_storage
+      - ./providers.xml:/opt/nifi-registry/nifi-registry-current/conf/providers.xml
+      - ./nifi-registry/database:/opt/nifi-registry/nifi-registry-current/database
+      
+    # - C:\Users\Tatiana Mara\Documents\Anotacoes NIFI\NIFI\providers.xml:/opt/nifi-registry/nifi-registry-current/conf/providers.xml
+    # - C:\Users\Tatiana Mara\Documents\Anotacoes NIFI\NIFI\flow-storage:/opt/nifi-registry/nifi-registry-current/flow_storage
+    # - C:\Users\Tatiana Mara\Documents\Anotacoes NIFI\NIFI\database:/opt/nifi-registry/nifi-registry-current/database
+  # volumes:
+  #   nifi_data:
+  #     external: true
+# networks:
+#   default:
+#     external:
+#       name: nifi-network
+volumes:
+  nifi_data:
+    external: true
