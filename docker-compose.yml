@@ -60,7 +60,7 @@ services:
       - JVM_OPTS=-Xmx512m -Xms512m -XX:MaxPermSize=1g
     volumes:
       - ./nifi-registry/flow_storage:/opt/nifi-registry/nifi-registry-current/flow_storage
-      - ./providers.xml:/opt/nifi-registry/nifi-registry-current/conf/providers.xml
+      # - ./providers.xml:/opt/nifi-registry/nifi-registry-current/conf/providers.xml
       - ./nifi-registry/database:/opt/nifi-registry/nifi-registry-current/database
       
     # - C:\Users\Tatiana Mara\Documents\Anotacoes NIFI\NIFI\providers.xml:/opt/nifi-registry/nifi-registry-current/conf/providers.xml
